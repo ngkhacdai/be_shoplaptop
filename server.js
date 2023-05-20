@@ -7,7 +7,7 @@ const expressHbs = require('express-handlebars');
 
 const apiRoute = require('./routes/api.js')
 const indexRoute = require('./routes/index.js')
-
+app.use(express.static('public'))
 app.engine('hbs', expressHbs.engine({
     extname: 'hbs',
     defaultLayout: 'layouts',

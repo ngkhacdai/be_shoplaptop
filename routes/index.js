@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
     res.render('home', { layout: 'login' })
 })
 
-router.get('/products', (req, res) => {
+router.get('/manage', (req, res) => {
     res.render('home', { layout: 'manage' })
 })
 
@@ -20,14 +20,14 @@ router.post('/signup', async (req, res) => {
     await userSchema.insertMany({ name: body.name, email: body.email, phone: body.phone, password: body.pass, address: body.address, sex: body.sex, role: 'user' })
     res.redirect('/');
 });
+
 router.post('/signin', async (req, res) => {
     const body = req.body;
     const a = await userSchema.findOne({ email: body.email, password: body.password });
     if (a) {
-        return res.redirect('/products');
+        return res.redirect('/manage');
     } else {
         return res.redirect('/');
     }
-
 });
 module.exports = router;
