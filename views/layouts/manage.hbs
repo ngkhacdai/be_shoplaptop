@@ -21,7 +21,7 @@
 
   <body>
     <div class="container mt-2">
-      <div class="row bg-primary">
+      <div class="row">
         <div class="col-sm-3">
           <img class="img-logo" src="img/logo.png" />
         </div>
@@ -36,8 +36,11 @@
           </form>
         </div>
         <div class="col-sm-3 mt-4">
-
           <div class="dropdown">
+            <a href="#"><i
+                class="bi bi-cart"
+                style="font-size: 40px; text-decoration: none; color: black; margin-right: 40px;"
+              ></i></a>
             <i class="bi bi-person-circle" style="font-size: 40px;"></i>
             <button
               class="dropdown-toggle"
@@ -47,18 +50,38 @@
               aria-expanded="false"
               style="border: 0;"
             >
-              Thông tin cá nhân
+              {{user.name}}
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+              {{#if checkAdmin}}
+                <li><a class="dropdown-item" href="/product">Danh sách sản phẩm</a></li>
+                <li><a class="dropdown-item" href="#">Quản lý đơn hàng</a></li>
+                <li><a class="dropdown-item" href="#">Đăng xuất</a></li>
+              {{else}}
+                <li><a class="dropdown-item" href="#">Thông tin cá nhân</a></li>
+                <li><a class="dropdown-item" href="#">Xem hóa đơn</a></li>
+                <li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
+              {{/if}}
+
             </ul>
           </div>
         </div>
       </div>
-      <div class="row">
-
+      <div class="row mt-5">
+        <div class="col-sm 4">
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="..." alt="Card image cap" />
+            <div class="card-body">
+              <h5 class="card-title">Card title</h5>
+              <p class="card-text">a</p>
+              <p
+                class="card-text"
+                style="color: red; text-decoration: underline;"
+              >b</p>
+              <a href="#" class="btn btn-primary">Chi tiết sản phẩm</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
