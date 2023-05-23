@@ -1,13 +1,25 @@
 var express = require('express');
 var router = express.Router();
+const fs = require('fs');
+const multer = require('multer');
 const bodyParser = require("body-parser");
 router.use(bodyParser.json());
 const parser = bodyParser.urlencoded({ extended: true });
 const cookieParser = require("cookie-parser");
 router.use(cookieParser());
 const userSchema = require('../models/user');
-const user = require('../models/user');
+const productSchema = require('../models/product');
 router.use(parser);
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now())
+    }
+})
+
+var upload = multer({ storage: storage });
 
 router.get('/', (req, res) => {
     res.render('home', { layout: 'login' })
@@ -37,9 +49,9 @@ router.get('/logout', (req, res) => {
 router.get('/product', async (req, res) => {
     if(req.cookies.jwt){
         const user = await userSchema.findOne({_id: req.cookies.jwt});
-        let checkAdmin = false;
         if(user.role == 'admin'){
-            res.render('home', { layout: 'product' })
+            const product = await productSchema.find();
+            res.render('home', { layout: 'product' ,product: product})
         }else{
             return res.redirect('/');
         }
@@ -65,4 +77,36 @@ router.post('/signin', async (req, res) => {
         return res.redirect('/');
     }
 });
+
+router.post('/addProduct',upload.single('myFile'), async (req, res) => {
+    const body = req.body;
+    var img = fs.readFileSync(req.file.path);
+    var encode_img = img.toString('base64');
+    var final_img = {
+        contentType: req.file.mimetype,
+        data: encode_img
+    };
+    await productSchema.insertMany({name: body.name,brand: body.brand,price: body.price,quantyti: body.quantyti,price: body.price,descaption: body.descaption,img: final_img})
+    res.redirect('/product')
+})
+
+router.post('/updateProduct/:id', upload.single('myFile'), async (req,res) => {
+    const body = req.body;
+        if(req.file){
+            var img = fs.readFileSync(req.file.path);
+            var encode_img = img.toString('base64');
+            var final_img = {
+                contentType: req.file.mimetype,
+                data: encode_img
+            }
+            await productSchema.updateOne({_id: req.params.id},{$set: {name: body.name,brand: body.brand,price: body.price,quantyti: body.quantyti,price: body.price,descaption: body.descaption,img: final_img}})
+        }else{
+            await productSchema.updateOne({_id: req.params.id},{$set: {name: body.name,brand: body.brand,price: body.price,quantyti: body.quantyti,price: body.price,descaption: body.descaption}})
+        }
+    res.redirect('/product')
+})
+router.get('/deleteProduct/:id', upload.single('myFile'), async (req,res) => {
+    await productSchema.deleteOne({_id: req.params.id})
+    res.redirect('/product')
+})
 module.exports = router;
