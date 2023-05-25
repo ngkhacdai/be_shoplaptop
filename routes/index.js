@@ -30,11 +30,6 @@ router.get('/manage', async (req, res) => {
         const user = await userSchema.findOne({_id: req.cookies.jwt});
         const product = await productSchema.find();
         let checkAdmin = false;
-        // if(user.role == 'admin'){
-        //     checkAdmin = true;
-        // }else{
-        //     checkAdmin = false;
-        // }
         res.render('home', { layout: 'manage' , user: user, product: product })
     }else{
         return res.redirect('/');
@@ -64,7 +59,10 @@ router.get('/product', async (req, res) => {
 
 router.get('/productDetails/:id',async (req, res) => {
     await productSchema.findOne({_id: req.params.id}).then((product) => {
-        return res.render('home', {layout: 'productdetail',product: product})
+        userSchema.findOne({_id: req.cookies.jwt}).then((user) => {
+            res.render('home', { layout: 'prdetail' ,product: product,user: user });
+        })
+        
     })
 })
 

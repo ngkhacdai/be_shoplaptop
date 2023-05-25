@@ -4,7 +4,6 @@ const port = 8080;
 const mongoose = require('mongoose');
 mongoose.connect('mongodb+srv://ngkhacdai:a012675921@assignmentmob402.mbfbglm.mongodb.net/shoplaptop');
 const expressHbs = require('express-handlebars');
-const hbs = require('hbs');
 const apiRoute = require('./routes/api.js')
 const indexRoute = require('./routes/index.js')
 app.use(express.static('public'))
