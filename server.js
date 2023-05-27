@@ -31,6 +31,7 @@ app.engine('hbs', expressHbs.engine({
                 return options.inverse(this);
             }
         },
+        sum: (a, b) => a + b 
     }
 }));
 

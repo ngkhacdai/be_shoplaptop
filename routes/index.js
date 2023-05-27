@@ -7,6 +7,8 @@ router.use(bodyParser.json());
 const parser = bodyParser.urlencoded({ extended: true });
 const cookieParser = require("cookie-parser");
 router.use(cookieParser());
+const cartSchema = require('../models/cart');
+const cartItemSchema = require('../models/cartitem');
 const userSchema = require('../models/user');
 const productSchema = require('../models/product');
 router.use(parser);
@@ -66,10 +68,43 @@ router.get('/productDetails/:id',async (req, res) => {
     })
 })
 
+router.get('/cart', async (req, res) => {
+    let list = [];
+    await cartSchema.findOne({user_id: req.cookies.jwt}).then((cart) => {
+        cartItemSchema.find({cart_id: cart._id}).then((cartItem) => {
+            for(let i =0 ; i< cartItem.length ; i++) {
+                list.push(cartItem[i].product_id);
+            }
+            productSchema.find({_id: {
+                $in: list
+            }}).then((product) => {
+                let tong = 0;
+                for (let index = 0; index < product.length; index++) {
+                    tong += product[index].price;
+                    
+                }
+                res.render('home', { layout: 'cart',size: cartItem.length,product: product,item: cartItem,total: tong});
+            });
+        });
+        
+    })
+    
+})
+
+router.get('/deleteItemInCart/:id', async (req, res) => {
+    await cartItemSchema.deleteOne({product_id: req.params.id}).then(()=>{
+        res.redirect('/cart');
+    })
+})
+
 router.post('/signup', async (req, res) => {
     const body = req.body;
     await userSchema.insertMany({ name: body.name, email: body.email, phone: body.phone, password: body.pass, address: body.address, sex: body.sex, role: 'user' })
-    res.redirect('/');
+    await userSchema.findOne({email: body.email, password: body.pass}).then((user) => {
+        cartSchema.insertMany({user_id: user._id})
+    }).then((cart) =>res.redirect('/'))
+    
+    
 });
 
 router.post('/signin', async (req, res) => {
@@ -114,4 +149,15 @@ router.get('/deleteProduct/:id', upload.single('myFile'), async (req,res) => {
     await productSchema.deleteOne({_id: req.params.id})
     res.redirect('/product')
 })
+router.get('/addToCart/:id', async (req, res) => {
+    const cart = await cartSchema.findOne({user_id: req.cookies.jwt})
+    const checkProductInCart = await cartItemSchema.findOne({cart_id: cart._id,product_id: req.params.id});
+    if(checkProductInCart){
+
+    }else{
+        await cartItemSchema.insertMany({cart_id: cart._id,product_id: req.params.id});
+    }
+    
+});
+
 module.exports = router;
