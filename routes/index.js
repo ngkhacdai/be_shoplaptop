@@ -95,15 +95,24 @@ router.get('/cart', async (req, res) => {
 
 router.get('/hoadon', async (req, res) => {
     const user = await userSchema.findOne({_id: req.cookies.jwt});
-    await orderSchema.find({user_id: req.cookies.jwt}).then((order) => {
-        res.render('home', {layout: 'hoadon', user: user,order: order})
-    })
+    if(user.role == 'admin'){
+        const orderWait = await orderSchema.find({status: 'Chờ xác nhận'})
+        const orderShip = await orderSchema.find({status: 'Đang giao hàng'})
+        const orderRecive = await orderSchema.find({status: 'Đã nhận hàng'})
+        res.render('home', {layout: 'donhang',user: user ,orderShip: orderShip, orderRecive: orderRecive,orderWait: orderWait})
+    }else{
+        await orderSchema.find({user_id: req.cookies.jwt}).then((order) => {
+            res.render('home', {layout: 'hoadon', user: user,order: order})
+        })
+    }
+    
 })
 
 router.get('/orderdetails/:id', async (req, res) => {
     let list = [];
+    let listproduct = [];
     const user = await userSchema.findOne({_id: req.cookies.jwt});
-    const order = await orderSchema.findOne({user_id: user._id},{total: 1, _id: 0});
+    const order = await orderSchema.findOne({user_id: user._id});
     orderItemSchema.find({order_id: req.params.id}).then((item) => {
         for(let i =0 ; i< item.length ; i++) {
             list.push(item[i].product_id);
@@ -111,7 +120,16 @@ router.get('/orderdetails/:id', async (req, res) => {
         productSchema.find({_id: {
             $in: list
         }}).then((product) => {
-            res.render('home', {layout: 'orderdetails', product: product,user: user, orderdetail: item,order: order});
+            
+            for (let i = 0; i < product.length; i++) {
+                // let a = [];
+                // a.push(product[i]);
+                // a.push({item: item[i].quantyti});
+                let a = product[i];
+                a.item = item[i].quantyti;
+                listproduct.push(a);
+            }
+            res.render('home', {layout: 'orderdetails', product: listproduct,user: user, orderdetail: item,order: order});
         })
         
     })

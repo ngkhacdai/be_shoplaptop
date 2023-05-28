@@ -41,6 +41,7 @@
                 </div>
             </div>
         </div>
+        {{#checkAdmin user.role}}
         <div class="row mt-5">
             <table class="table">
                 <thead>
@@ -55,22 +56,21 @@
                 </thead>
                 <tbody>
                     {{#each product}}
-                    {{#each ../orderdetail}}
                     <tr>
                         <td>
                             <img style="width: 80px; height: 100px;"
-                                src="data:{{../img.contentType}};base64,{{../img.data}}" />
+                                src="data:{{img.contentType}};base64,{{img.data}}" />
                         </td>
-                        <td style="width: 500px;">{{../name}}</td>
-                        <td>{{../brand}}</td>
-                        <td>{{../price}}</td>
-                        <td>{{quantyti}}</td>
+                        <td style="width: 500px;">{{name}}</td>
+                        <td>{{brand}}</td>
+                        <td>{{price}}</td>
+                        <td>{{item}}</td>
                         <td>
-                            {{#tinhTien quantyti ../price}}
+                            {{#tinhTien item price}}
                             {{/tinhTien}}
                         </td>
+                        {{break}}
                     </tr>
-                    {{/each}}
                     {{/each}}
                 </tbody>
             </table>
@@ -83,6 +83,56 @@
                 <h5>Tổng giá: </h5>
             </div>
         </div>
+        <div class="row">
+            {{#checkDonHang order.status}}
+            <button class="btn btn-primary">Giao hàng</button>
+            {{else}}
+            <button class="btn btn-primary" disabled>Giao hàng</button>
+            {{/checkDonHang}}
+        </div>
+        {{else}}
+        <div class="row mt-5">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Hãng</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each product}}
+                    <tr>
+                        <td>
+                            <img style="width: 80px; height: 100px;"
+                                src="data:{{img.contentType}};base64,{{img.data}}" />
+                        </td>
+                        <td style="width: 500px;">{{name}}</td>
+                        <td>{{brand}}</td>
+                        <td>{{price}}</td>
+                        <td>{{item}}</td>
+                        <td>
+                            {{#tinhTien item price}}
+                            {{/tinhTien}}
+                        </td>
+                        {{break}}
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        <div class=" mt-3 d-flex flex-row-reverse">
+            <div class="col-sm-2">
+                {{order.total}}
+            </div>
+            <div class="col-sm-2 me-2">
+                <h5>Tổng giá: </h5>
+            </div>
+        </div>
+        {{/checkAdmin}}
     </div>
 </body>
 

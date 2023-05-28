@@ -34,6 +34,16 @@ app.engine('hbs', expressHbs.engine({
         sum: (a, b) => a + b ,
         tinhTien: function(v1,v2){
             return Number(v1)*Number(v2);
+        },
+        checkDonHang: (v1,options) => {
+            if(v1 == 'Chờ xác nhận'){
+                return options.fn(this);
+            }else{
+                return options.inverse(this);
+            }
+        },
+        breakloop: () => {
+            return ;
         }
     }
 }));
