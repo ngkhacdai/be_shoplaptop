@@ -13,6 +13,7 @@ const userSchema = require('../models/user');
 const productSchema = require('../models/product');
 const orderSchema = require('../models/order');
 const orderItemSchema = require('../models/orderitem');
+const { request } = require('http');
 router.use(parser);
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -97,7 +98,7 @@ router.get('/hoadon', async (req, res) => {
     const user = await userSchema.findOne({_id: req.cookies.jwt});
     if(user.role == 'admin'){
         const orderWait = await orderSchema.find({status: 'Chờ xác nhận'})
-        const orderShip = await orderSchema.find({status: 'Đang giao hàng'})
+        const orderShip = await orderSchema.find({status: 'Đơn hàng đang giao'})
         const orderRecive = await orderSchema.find({status: 'Đã nhận hàng'})
         res.render('home', {layout: 'donhang',user: user ,orderShip: orderShip, orderRecive: orderRecive,orderWait: orderWait})
     }else{
@@ -112,7 +113,7 @@ router.get('/orderdetails/:id', async (req, res) => {
     let list = [];
     let listproduct = [];
     const user = await userSchema.findOne({_id: req.cookies.jwt});
-    const order = await orderSchema.findOne({user_id: user._id});
+    const order = await orderSchema.findOne({_id: req.params.id});
     orderItemSchema.find({order_id: req.params.id}).then((item) => {
         for(let i =0 ; i< item.length ; i++) {
             list.push(item[i].product_id);
@@ -122,17 +123,36 @@ router.get('/orderdetails/:id', async (req, res) => {
         }}).then((product) => {
             
             for (let i = 0; i < product.length; i++) {
-                // let a = [];
-                // a.push(product[i]);
-                // a.push({item: item[i].quantyti});
                 let a = product[i];
                 a.item = item[i].quantyti;
                 listproduct.push(a);
             }
-            res.render('home', {layout: 'orderdetails', product: listproduct,user: user, orderdetail: item,order: order});
+            res.render('home', {layout: 'orderdetails', product: listproduct,user: user, orderdetail: item,order: order,order_id: req.params.id});
         })
         
     })
+})
+
+router.get('/giaoHang/:id', async (req, res) => {
+    const user = await userSchema.findOne({_id: req.cookies.jwt})
+    await orderSchema.updateOne({_id: req.params.id},{
+        $set: {
+            status: 'Đơn hàng đang giao'
+        }
+    }).then(
+        res.redirect('/orderdetails/' + req.params.id)
+    )
+})
+
+router.get('/nhanHang/:id', async (req, res) => {
+    const user = await userSchema.findOne({_id: req.cookies.jwt})
+    await orderSchema.updateOne({_id: req.params.id},{
+        $set: {
+            status: 'Đã nhận hàng'
+        }
+    }).then(
+        res.redirect('/orderdetails/' + req.params.id)
+    )
 })
 
 router.get('/deleteItemInCart/:id', async (req, res) => {

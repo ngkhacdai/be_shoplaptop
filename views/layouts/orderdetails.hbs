@@ -69,7 +69,6 @@
                             {{#tinhTien item price}}
                             {{/tinhTien}}
                         </td>
-                        {{break}}
                     </tr>
                     {{/each}}
                 </tbody>
@@ -84,10 +83,10 @@
             </div>
         </div>
         <div class="row">
-            {{#checkDonHang order.status}}
-            <button class="btn btn-primary">Giao hàng</button>
+            {{#checkDonHang order.status order_id}}
+            <button class="btn btn-primary" onclick="giaoHang(`{{@id}}`)">Giao hàng</button>
             {{else}}
-            <button class="btn btn-primary" disabled>Giao hàng</button>
+            <button class="btn btn-primary" disabled>{{@tt}}</button>
             {{/checkDonHang}}
         </div>
         {{else}}
@@ -132,8 +131,16 @@
                 <h5>Tổng giá: </h5>
             </div>
         </div>
+        <div class="row">
+            {{#checkNhanHang order.status order_id}}
+            <button class="btn btn-primary" onclick="nhanHang(`{{@id}}`)">Nhận hàng</button>
+            {{else}}
+            <button class="btn btn-primary" disabled>{{@tt}}</button>
+            {{/checkNhanHang}}
+        </div>
         {{/checkAdmin}}
     </div>
+    <script src="/script/orderdetail.js"></script>
 </body>
 
 </html>

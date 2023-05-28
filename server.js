@@ -35,16 +35,24 @@ app.engine('hbs', expressHbs.engine({
         tinhTien: function(v1,v2){
             return Number(v1)*Number(v2);
         },
-        checkDonHang: (v1,options) => {
+        checkDonHang: (v1,v2,options) => {
             if(v1 == 'Chờ xác nhận'){
-                return options.fn(this);
+                return options.fn(this,{data: {id: v2}});
             }else{
-                return options.inverse(this);
+                return options.inverse(this,{data: {tt: 'Đã giao hàng'}});
             }
         },
-        breakloop: () => {
-            return ;
-        }
+        checkNhanHang: (v1,v2,options) => {
+            if(v1 == 'Đơn hàng đang giao'){
+                return options.fn(this,{data: {id: v2}});
+            }else if(v1 == 'Chờ xác nhận'){
+                return options.inverse(this, {data: {tt: 'Chờ xác nhận'}});
+            }
+            else{
+                return options.inverse(this, {data: {tt: 'Đã nhận hàng'}});
+            }
+        },
+
     }
 }));
 
