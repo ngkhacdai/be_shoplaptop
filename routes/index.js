@@ -11,6 +11,8 @@ const cartSchema = require('../models/cart');
 const cartItemSchema = require('../models/cartitem');
 const userSchema = require('../models/user');
 const productSchema = require('../models/product');
+const orderSchema = require('../models/order');
+const orderItemSchema = require('../models/orderitem');
 router.use(parser);
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -31,7 +33,6 @@ router.get('/manage', async (req, res) => {
     if(req.cookies.jwt){
         const user = await userSchema.findOne({_id: req.cookies.jwt});
         const product = await productSchema.find();
-        let checkAdmin = false;
         res.render('home', { layout: 'manage' , user: user, product: product })
     }else{
         return res.redirect('/');
@@ -70,6 +71,7 @@ router.get('/productDetails/:id',async (req, res) => {
 
 router.get('/cart', async (req, res) => {
     let list = [];
+    const user = await userSchema.findOne({_id: req.cookies.jwt})
     await cartSchema.findOne({user_id: req.cookies.jwt}).then((cart) => {
         cartItemSchema.find({cart_id: cart._id}).then((cartItem) => {
             for(let i =0 ; i< cartItem.length ; i++) {
@@ -83,12 +85,19 @@ router.get('/cart', async (req, res) => {
                     tong += product[index].price;
                     
                 }
-                res.render('home', { layout: 'cart',size: cartItem.length,product: product,item: cartItem,total: tong});
+                res.render('home', { layout: 'cart',size: cartItem.length,product: product,item: cartItem,total: tong,user: user});
             });
         });
         
     })
     
+})
+
+router.get('/hoadon', async (req, res) => {
+    const user = await userSchema.findOne({_id: req.cookies.jwt});
+    await orderSchema.find({user_id: req.cookies.jwt}).then((order) => {
+        res.render('home', {layout: 'hoadon', user: user,order: order})
+    })
 })
 
 router.get('/deleteItemInCart/:id', async (req, res) => {
@@ -159,5 +168,30 @@ router.get('/addToCart/:id', async (req, res) => {
     }
     
 });
+router.post('/thanhToan', async (req, res) => {
+    const date = new Date();
+    const listQ = req.body.listQ;
+    let saveOrder = '';
+    let day = date.getDate();
+    let month = date.getMonth();
+    let year = date.getFullYear();
+    let fullDate = day + '-' + month + '-' + year;
+    await orderSchema.insertMany({user_id: req.cookies.jwt,total: req.body.total,date: fullDate,status: 'Chờ xác nhận'});
+    await orderSchema.find().then((order) => {
+        saveOrder = order[order.length - 1]._id;
+    })
+    await cartSchema.findOne({user_id: req.cookies.jwt}).then((cart)=> {
+        cartItemSchema.find({cart_id: cart.id}).then((cartItem)=> {
+            for (let i = 0; i < cartItem.length; i++) {
+                orderItemSchema.insertMany({order_id: saveOrder, product_id: cartItem[i].product_id, quantyti: listQ[i]})
+            }
+        })
+        .then(() => {
+            cartItemSchema.deleteMany({cart_id: cart._id}).then(res.redirect('/cart'));
+        })
+    })
+})
+
+
 
 module.exports = router;

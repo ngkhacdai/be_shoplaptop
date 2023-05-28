@@ -90,7 +90,7 @@
 
                                                 <div class="form-outline">
                                                     <input id="form1" min="1" step="1" name="quantity" value="1"
-                                                        type="number" class="form-control"
+                                                        type="number" class="form-control" disabled
                                                         onchange="tinhTien(`{{price}}`)" />
                                                     <label class="form-label" for="form1">Quantity</label>
                                                 </div>
@@ -131,7 +131,8 @@
                                             <span><strong id="total">{{total}}</strong></span>
                                         </li>
                                     </ul>
-                                    <button type="button" class="btn btn-primary btn-lg btn-block">
+                                    <button type="button" onclick="thanhToan()"
+                                        class="btn btn-primary btn-lg btn-block">
                                         Thanh toán
                                     </button>
                                 </div>
