@@ -100,6 +100,23 @@ router.get('/hoadon', async (req, res) => {
     })
 })
 
+router.get('/orderdetails/:id', async (req, res) => {
+    let list = [];
+    const user = await userSchema.findOne({_id: req.cookies.jwt});
+    const order = await orderSchema.findOne({user_id: user._id},{total: 1, _id: 0});
+    orderItemSchema.find({order_id: req.params.id}).then((item) => {
+        for(let i =0 ; i< item.length ; i++) {
+            list.push(item[i].product_id);
+        }
+        productSchema.find({_id: {
+            $in: list
+        }}).then((product) => {
+            res.render('home', {layout: 'orderdetails', product: product,user: user, orderdetail: item,order: order});
+        })
+        
+    })
+})
+
 router.get('/deleteItemInCart/:id', async (req, res) => {
     await cartItemSchema.deleteOne({product_id: req.params.id}).then(()=>{
         res.redirect('/cart');
