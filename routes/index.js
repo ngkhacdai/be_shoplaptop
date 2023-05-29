@@ -46,6 +46,11 @@ router.get('/logout', (req, res) => {
     return res.redirect('/');
 })
 
+router.get('/thongke', async (req, res) => {
+    const user = await userSchema.findOne({_id: req.cookies.jwt});
+    res.render('home', { layout: 'thongke' , user: user })
+})
+
 router.get('/product', async (req, res) => {
     if(req.cookies.jwt){
         const user = await userSchema.findOne({_id: req.cookies.jwt});
@@ -224,14 +229,9 @@ router.get('/addToCart/:id', async (req, res) => {
     
 });
 router.post('/thanhToan', async (req, res) => {
-    const date = new Date();
+    let date = new Date().toJSON();
     const listQ = req.body.listQ;
-    let saveOrder = '';
-    let day = date.getDate();
-    let month = date.getMonth();
-    let year = date.getFullYear();
-    let fullDate = day + '-' + month + '-' + year;
-    await orderSchema.insertMany({user_id: req.cookies.jwt,total: req.body.total,date: fullDate,status: 'Chờ xác nhận'});
+    await orderSchema.insertMany({user_id: req.cookies.jwt,total: req.body.total,date: date,status: 'Chờ xác nhận'});
     await orderSchema.find().then((order) => {
         saveOrder = order[order.length - 1]._id;
     })
@@ -247,6 +247,23 @@ router.post('/thanhToan', async (req, res) => {
     })
 })
 
-
+router.post('/thongke', async (req, res) => {
+    let list = [];
+    let from = new Date(req.body.begin);
+    let to = new Date(req.body.end);
+    await orderSchema.find({status: {
+        $in: ['Đã nhận hàng','Đơn hàng đang giao']
+    },date: {
+        $gte: from, $lt: to
+    }}).then((order)=> {
+        let total = 0;
+        for (let i = 0; i < order.length; i++) {
+            total += order[i].total;
+            
+        }
+        res.render('home', {layout: 'thongke', total: total})
+    });
+    
+})
 
 module.exports = router;

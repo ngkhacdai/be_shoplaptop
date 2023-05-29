@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
         type: Number,
     },
     date: {
-        type: String,
+        type: Date,
     },
     status: {
         type: String,
