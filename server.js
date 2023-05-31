@@ -60,6 +60,7 @@ app.set('view engine', '.hbs');
 app.set('views', './views');
 
 app.use('/', indexRoute);
+app.use('/api', apiRoute);
 
 app.listen(port, () => {
     console.log('app listening on port ' + port);
