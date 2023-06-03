@@ -7,6 +7,9 @@ const cartItemSchema = new mongoose.Schema({
     product_id: {
         type: String,
     },
+    quantyti: {
+        type: Number,
+    }
 })
 
 module.exports = new mongoose.model('cartitem', cartItemSchema);

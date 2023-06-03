@@ -32,25 +32,35 @@ router.get('/getAllProduct',async (req, res) => {
 
 router.get('/findProductByID/:id', async (req, res) => {
     await productSchema.findOne({_id: req.params.id}).then((product)=>{
+        console.log(product._id);
         res.send(product)
     })
         
 })
 
 router.post('/addToCart/:id' , async (req, res) => {
-    const cart = await cartSchema.findOne({user_id: req.cookies.jwt})
-    const checkProductInCart = await cartItemSchema.findOne({cart_id: cart._id,product_id: req.params.id});
-    if(checkProductInCart){
-
-    }else{
-        await cartItemSchema.insertMany({cart_id: cart._id,product_id: req.params.id});
+    if(req.body.id){
+        
+        await cartSchema.findOne({user_id: req.body.id}).then(cart =>{
+            cartItemSchema.findOne({cart_id: cart._id,product_id: req.params.id}).then((cartItem) => {
+                if(cartItem){
+                    console.log('Sản phẩm đã có trong cửa hàng');
+                }else{
+                    cartItemSchema.insertMany({cart_id: cart._id,product_id: req.params.id,quantyti: 1}).then((item)=> {
+                        console.log('Đã thêm thành công');
+                    })
+                }
+            })
+    
+        })
+        
     }
+    
 })
 
 router.post('/login', async (req, res) => {
     const body = req.body.newobj;
     const a = await userSchema.findOne({ email: body.username, password: body.password });
-    res.cookie("jwt", a._id);
     res.send(a);
 })
 
@@ -66,20 +76,36 @@ router.get('/checkCookie' , (req, res) => {
     res.send(req.cookies.jwt)
 })
 
-router.get('/getitemincart', async (req, res) =>{
+router.post('/getitemincart', async (req, res) =>{
     let list = [];
-    await cartSchema.findOne({user_id: req.cookies.jwt}).then((cart) => {
-        cartItemSchema.find({cart_id: cart._id}).then((cartItem) => {
-            for(let i =0 ; i< cartItem.length ; i++) {
-                list.push(cartItem[i].product_id);
-            }
-            productSchema.find({_id: {
-                $in: list
-            }}).then((product) => {
-                console.log(product[0].name);
-                res.send(product)
+    let listCartItem = [];
+    if(req.body.id){
+        await cartSchema.findOne({user_id: req.body.id}).then((cart) => {
+            cartItemSchema.find({cart_id: cart._id}).then((cartItem) => {
+                for(let i =0 ; i< cartItem.length ; i++) {
+                    list.push(cartItem[i].product_id);
+                }
+                productSchema.find({_id: {
+                    $in: list
+                }}).then((product) => {
+                    for (let i = 0; i < product.length; i++) {
+                        let a = product[i];
+                        a.quantyti = cartItem[i].quantyti;
+                        listCartItem.push(a);
+                    }
+                    res.send(listCartItem);
+                });
             });
-        });
+        })
+    }
+    
+})
+
+router.post('/removeitemincart', async (req, res) => {
+    await cartSchema.findOne({user_id:req.body.user}).then((cart) => {
+        cartItemSchema.deleteOne({cart_id: cart._id,product_id: req.body.id}).then((carti) =>{
+            console.log(carti);
+        })
         
     })
 })

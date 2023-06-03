@@ -224,7 +224,7 @@ router.get('/addToCart/:id', async (req, res) => {
     if(checkProductInCart){
 
     }else{
-        await cartItemSchema.insertMany({cart_id: cart._id,product_id: req.params.id});
+        await cartItemSchema.insertMany({cart_id: cart._id,product_id: req.params.id,quantyti: 1});
     }
     
 });
