@@ -236,7 +236,7 @@ router.post('/thanhToan', async (req, res) => {
         saveOrder = order[order.length - 1]._id;
     })
     await cartSchema.findOne({user_id: req.cookies.jwt}).then((cart)=> {
-        cartItemSchema.find({cart_id: cart.id}).then((cartItem)=> {
+        cartItemSchema.find({cart_id: cart._id}).then((cartItem)=> {
             for (let i = 0; i < cartItem.length; i++) {
                 orderItemSchema.insertMany({order_id: saveOrder, product_id: cartItem[i].product_id, quantyti: listQ[i]})
             }

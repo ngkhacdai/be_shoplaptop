@@ -28,6 +28,7 @@ var upload = multer({ storage: storage });
 
 router.get('/getAllProduct',async (req, res) => {
     res.send(await productSchema.find());
+    console.log('list product');
 })
 
 router.get('/findProductByID/:id', async (req, res) => {
@@ -93,6 +94,7 @@ router.post('/getitemincart', async (req, res) =>{
                         a.quantyti = cartItem[i].quantyti;
                         listCartItem.push(a);
                     }
+                    console.log('show list cart items');
                     res.send(listCartItem);
                 });
             });
@@ -110,5 +112,45 @@ router.post('/removeitemincart', async (req, res) => {
     })
 })
 
+router.post('/tangquantyti',async (req, res) =>{
+    await cartSchema.findOne({user_id:req.body.user}).then((cart) => {
+        cartItemSchema.updateOne({cart_id: cart._id,product_id: req.body.id},{$set: {
+            quantyti: req.body.quantyti
+        }}).then((carti) =>{
+            console.log(carti);
+        })
+        
+    })
+})
+
+router.post('/giamquantyti',async (req, res) =>{
+    await cartSchema.findOne({user_id:req.body.user}).then((cart) => {
+        cartItemSchema.updateOne({cart_id: cart._id,product_id: req.body.id},{$set: {
+            quantyti: req.body.quantyti
+        }}).then((carti) =>{
+            console.log(carti);
+        })
+        
+    })
+})
+
+router.post('/thanhtoan',async (req, res) =>{
+    let date = new Date().toJSON();
+    const listQ = req.body.list;
+    await orderSchema.insertMany({user_id: req.body.id,total: req.body.total,date: date,status: 'Chờ xác nhận'});
+    await orderSchema.find().then((order) => {
+        saveOrder = order[order.length - 1]._id;
+    })
+    await cartSchema.findOne({user_id: req.body.id}).then((cart)=> {
+        cartItemSchema.find({cart_id: cart._id}).then((cartItem)=> {
+            for (let i = 0; i < cartItem.length; i++) {
+                orderItemSchema.insertMany({order_id: saveOrder, product_id: cartItem[i].product_id, quantyti: listQ[i]})
+            }
+        })
+        .then(() => {
+            cartItemSchema.deleteMany({cart_id: cart._id}).then(()=> {console.log('Thanh Toán thành công');})
+        })
+    })
+})
 
 module.exports = router;
