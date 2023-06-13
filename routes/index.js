@@ -251,6 +251,7 @@ router.post('/thongke', async (req, res) => {
     let list = [];
     let from = new Date(req.body.begin);
     let to = new Date(req.body.end);
+    await userSchema.findOne({_id: req.cookies.jwt})
     await orderSchema.find({status: {
         $in: ['Đã nhận hàng','Đơn hàng đang giao']
     },date: {
@@ -261,7 +262,7 @@ router.post('/thongke', async (req, res) => {
             total += order[i].total;
             
         }
-        res.render('home', {layout: 'thongke', total: total})
+        res.render('home', {layout: 'thongke', total: total,user: user})
     });
     
 })
