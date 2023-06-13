@@ -14,6 +14,7 @@ const productSchema = require('../models/product');
 const orderSchema = require('../models/order');
 const orderItemSchema = require('../models/orderitem');
 const { request } = require('http');
+const { send } = require('process');
 router.use(parser);
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -152,5 +153,47 @@ router.post('/thanhtoan',async (req, res) =>{
         })
     })
 })
+
+router.post('/getAllOrderByID',async (req, res) => {
+    await orderSchema.find({_id: req.body.id}).sort({date: 1}).then((order) => {
+        res.send(order);
+    })
+})
+
+router.post('/user', async (req, res) => {
+    await userSchema.findOne({_id: req.body.user}).then((user) => {
+        return res.send(user);
+    })
+})
+
+router.post('/getorder', async (req, res) => {
+    await orderSchema.find({user_id: req.body.id}).sort({date: -1}).then((order) => {
+        res.send(order)
+    })
+})
+router.post('/getorderdetail', async (req, res) => {
+    let list = [];
+    let listproduct = [];
+    const order = await orderSchema.findOne({_id: req.body.id});
+    orderItemSchema.find({order_id: req.body.id}).then((item) => {
+        for(let i =0 ; i< item.length ; i++) {
+            list.push(item[i].product_id);
+        }
+        productSchema.find({_id: {
+            $in: list
+        }}).then((product) => {
+            
+            for (let i = 0; i < product.length; i++) {
+                let a = product[i];
+                a = {...a, soLuong: item[i].quantyti}
+                listproduct.push(a);
+            }
+            res.send(listproduct);
+        })
+        
+    })
+})
+
+
 
 module.exports = router;
