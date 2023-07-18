@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 8080;
+const path = require('path');
 const mongoose = require('mongoose');
 mongoose.connect('mongodb+srv://ngkhacdai:a012675921@assignmentmob402.mbfbglm.mongodb.net/shoplaptop');
 const expressHbs = require('express-handlebars');
