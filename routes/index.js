@@ -27,30 +27,6 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 router.get('/', async (req, res) => {
-    const a = await orderSchema.aggregate([
-        {
-            $project: {"id": {"$toString": "$_id"}}
-        },
-        {
-            $lookup:
-                {
-                    localField: "id",
-                    from: "orderitems",
-                    foreignField : "order_id",
-                    as: "orderitem"
-                }
-        },
-        {
-            $project: {
-                "orderitem": 1,
-                orderitem: {
-                    quantyti: 1
-                }
-            }
-        },
-        {$unwind: "$orderitem"}
-    ])
-    console.log(a);
     res.render('home', { layout: 'login' })
 })
 
